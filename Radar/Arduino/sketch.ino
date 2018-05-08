@@ -1,51 +1,53 @@
-// Includes the Servo library
 #include <Servo.h>
-// Defines Tirg and Echo pins of the Ultrasonic Sensor
-const int trigPin = 11;
-const int echoPin = 10;
-// Variables for the duration and the distance
-long duration;
-int distance;
-Servo myServo; // Creates a servo object for controlling the servo motor
+
+const short START_ROTATE = 0;
+const short FULL_ROTATE = 175;
+
+const short DELAY_MS = 50;
+
+const short ECHO_PIN = 10;
+const short TRIG_PIN = 11;
+const short SERVO_PIN = 12;
+
+long duration = 0; 
+short distance = 0;
+
+Servo usingServo;
+
 void setup() {
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
-  Serial.begin(9600);
-  myServo.attach(12); // Defines on which pin is the servo motor attached
+    pinMode(TRIG_PIN, OUTPUT);
+    pinMode(ECHO_PIN, OUTPUT);
+    
+    Serial.begin(9600);
+
+    usingServo.attach(SERVO_PIN);
 }
+
 void loop() {
-  // rotates the servo motor from 15 to 165 degrees
-  for(int i=0;i<=175;i++){  
-  myServo.write(i);
-  delay(50);
-  distance = calculateDistance();// Calls a function for calculating the distance measured by the Ultrasonic sensor for each degree
-  
-  Serial.print(i); // Sends the current degree into the Serial Port
-  Serial.print(","); // Sends addition character right next to the previous value needed later in the Processing IDE for indexing
-  Serial.print(distance); // Sends the distance value into the Serial Port
-  Serial.print("."); // Sends addition character right next to the previous value needed later in the Processing IDE for indexing
-  }
-  // Repeats the previous lines from 165 to 15 degrees
-  for(int i=175;i>0;i--){  
-  myServo.write(i);
-  delay(50);
-  distance = calculateDistance();
-  Serial.print(i);
-  Serial.print(",");
-  Serial.print(distance);
-  Serial.print(".");
-  }
+    for (int angle = START_ROTATE; angle <= FULL_ROTATE; ++angle) {
+        usingServo.write(angle);
+        
+        delay(DELAY_MS);
+
+        distance = calculateDistance();
+
+        Serial.print(angle + ',' + distance + '.');
+    }
 }
-// Function for calculating the distance measured by the Ultrasonic sensor
-int calculateDistance(){ 
-  
-  digitalWrite(trigPin, LOW); 
-  delayMicroseconds(2);
-  // Sets the trigPin on HIGH state for 10 micro seconds
-  digitalWrite(trigPin, HIGH); 
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  duration = pulseIn(echoPin, HIGH); // Reads the echoPin, returns the sound wave travel time in microseconds
-  distance= duration*0.034/2;
-  return distance;
+
+short calculateDistance() {
+    digitalWrite(TRIG_PIN, LOW);
+    delayMicroseconds(2);
+    
+    digitalWrite(TRIG_PIN, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(TRIG_PIN, LOW);
+
+    // Get travel time of wave
+    duration = pulseIn(ECHO_PIN, HIGH);
+
+    // calculate distance
+    distance *= 0.017;
+
+    return distance; 
 }
